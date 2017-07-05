@@ -15,6 +15,7 @@ import { dispatch, getState, subscribe } from '@wordpress/data';
  */
 import { mobileMiddleware } from '../utils/mobile';
 import effects from './effects';
+import { grtcMiddleware } from './reducer';
 
 /**
  * Applies the custom middlewares used specifically in the editor module
@@ -26,6 +27,7 @@ import effects from './effects';
 function applyMiddlewaresAndRestrictState() {
 	const middlewares = [
 		mobileMiddleware,
+		grtcMiddleware,
 		refx( effects ),
 		multi,
 	];
