@@ -14,6 +14,7 @@ import { settings as dateSettings } from '@wordpress/date';
  * Internal dependencies
  */
 import './assets/stylesheets/main.scss';
+import '../coediting/hooks';
 import Layout from './edit-post/layout';
 import { EditorProvider, ErrorBoundary } from './components';
 import { initializeMetaBoxState } from './actions';
