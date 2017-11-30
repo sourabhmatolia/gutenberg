@@ -4,6 +4,7 @@
 import { connect } from 'react-redux';
 import classnames from 'classnames';
 import { get, partial, reduce, size } from 'lodash';
+import 'element-closest';
 
 /**
  * WordPress dependencies
@@ -11,7 +12,7 @@ import { get, partial, reduce, size } from 'lodash';
 import { Component, compose, createElement } from '@wordpress/element';
 import { keycodes } from '@wordpress/utils';
 import { getBlockType, BlockEdit, getBlockDefaultClassname, createBlock, hasBlockSupport } from '@wordpress/blocks';
-import { withFilters } from '@wordpress/components';
+import { withFilters, withFocusOutside } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 
 /**
@@ -166,6 +167,33 @@ class BlockListBlock extends Component {
 
 	setBlockListRef( node ) {
 		this.props.blockRef( node, this.props.uid );
+	}
+
+	handleFocusOutside( event ) {
+		if ( ! this.props.isSelected ) {
+			return;
+		}
+
+		// There are several cases in which focus transitions outside the DOM
+		// space of a block, but is not truly outside, typically when managing
+		// toolbar or inspector controls. While this implementation binds
+		// awareness to ancestry, it still retains more self-sufficiency to a
+		// block than attempting to externally manage focus transitions. An
+		// alternative here would leverage React 16 portal virtual event
+		// bubbling, but we must first eliminate dependencies between toolbar
+		// and multi-selection DOM-based event bubbling.
+		//
+		// See: https://github.com/WordPress/gutenberg/pull/3083
+		// See: https://reactjs.org/docs/portals.html#event-bubbling-through-portals
+		const { relatedTarget } = event;
+		const isOutside = ! relatedTarget || ! relatedTarget.closest( [
+			'.editor-header',
+			'.editor-sidebar',
+		].join( ',' ) );
+
+		if ( isOutside ) {
+			this.props.onDeselect();
+		}
 	}
 
 	bindBlockNode( node ) {
@@ -516,5 +544,6 @@ const mapDispatchToProps = ( dispatch, ownProps ) => ( {
 
 export default compose(
 	withFilters( 'Editor.BlockItem' ),
-	connect( mapStateToProps, mapDispatchToProps )
+	connect( mapStateToProps, mapDispatchToProps ),
+	withFocusOutside
 )( BlockListBlock );
