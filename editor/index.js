@@ -9,6 +9,7 @@ import 'moment-timezone/moment-timezone-utils';
  */
 import { render, unmountComponentAtNode } from '@wordpress/element';
 import { settings as dateSettings } from '@wordpress/date';
+import { SlotFillProvider } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -87,7 +88,9 @@ export function createEditorInstance( id, post, settings ) {
 	const provider = render(
 		<EditorProvider settings={ settings } post={ post }>
 			<ErrorBoundary onError={ reboot }>
-				<Layout />
+				<SlotFillProvider>
+					<Layout />
+				</SlotFillProvider>
 			</ErrorBoundary>
 		</EditorProvider>,
 		target
