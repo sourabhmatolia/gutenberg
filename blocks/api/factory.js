@@ -25,11 +25,12 @@ import { getBlockType } from './registration';
 /**
  * Returns a block object given its type and attributes.
  *
- * @param  {String} name             Block name
- * @param  {Object} blockAttributes  Block attributes
- * @return {Object}                  Block object
+ * @param  {String} name            Block name
+ * @param  {Object} blockAttributes Block attributes
+ * @param  {?Array} innerBlocks     Nested blocks
+ * @return {Object}                 Block object
  */
-export function createBlock( name, blockAttributes = {} ) {
+export function createBlock( name, blockAttributes = {}, innerBlocks = [] ) {
 	// Get the type definition associated with a registered block.
 	const blockType = getBlockType( name );
 
@@ -53,6 +54,7 @@ export function createBlock( name, blockAttributes = {} ) {
 		name,
 		isValid: true,
 		attributes,
+		innerBlocks,
 	};
 }
 

@@ -32,16 +32,17 @@ export function getBlockDefaultClassname( blockName ) {
  *
  * @param  {Object} blockType  Block type
  * @param  {Object} attributes Block attributes
+ * @param  {?Array} children   Nested blocks
  * @return {string}            Save content
  */
-export function getSaveContent( blockType, attributes ) {
+export function getSaveContent( blockType, attributes, children = [] ) {
 	const { save } = blockType;
 	let saveContent;
 
 	if ( save.prototype instanceof Component ) {
-		saveContent = createElement( save, { attributes } );
+		saveContent = createElement( save, { attributes, children } );
 	} else {
-		saveContent = save( { attributes } );
+		saveContent = save( { attributes, children } );
 
 		// Special-case function render implementation to allow raw HTML return
 		if ( 'string' === typeof saveContent ) {
@@ -62,7 +63,12 @@ export function getSaveContent( blockType, attributes ) {
 	const contentWithExtraProps = Children.map( saveContent, addExtraContainerProps );
 
 	// Otherwise, infer as element
-	return renderToString( contentWithExtraProps );
+	let content = renderToString( contentWithExtraProps );
+
+	// Drop raw HTML wrappers (support dangerous inner HTML without wrapper)
+	content = content.replace( /<\/?wp-raw-html>/g, '' );
+
+	return content;
 }
 
 /**
@@ -143,7 +149,7 @@ export function getBlockContent( block ) {
 	let saveContent = block.originalContent;
 	if ( block.isValid ) {
 		try {
-			saveContent = getSaveContent( blockType, block.attributes );
+			saveContent = getSaveContent( blockType, block.attributes, block.innerBlocks );
 		} catch ( error ) {}
 	}
 
