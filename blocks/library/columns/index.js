@@ -46,6 +46,8 @@ registerBlockType( 'core/columns', {
 	edit( { attributes, setAttributes, setChildren, children, className, focus } ) {
 		const { columns } = attributes;
 
+		// TODO: Refactor setChildFragment to be less awful, separated, tested.
+
 		const setChildFragment = ( index ) => ( nextChildren ) => {
 			const fragmented = mapChildren( children, columns, identity );
 			const origNumChildren = fragmented[ index ].length;
