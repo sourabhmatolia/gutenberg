@@ -17,9 +17,13 @@ import { SlotFillProvider } from '@wordpress/components';
 import './assets/stylesheets/main.scss';
 import Layout from './edit-post/layout';
 import { EditorProvider, ErrorBoundary } from './components';
-import { initializeMetaBoxState } from './actions';
+import * as selectors from './selectors';
+import * as actions from './actions';
 
 export * from './components';
+export { default as createStore } from './store';
+export { selectors };
+export { actions };
 
 // Configure moment globally
 moment.locale( dateSettings.l10n.locale );
@@ -98,7 +102,7 @@ export function createEditorInstance( id, post, settings ) {
 
 	return {
 		initializeMetaBoxes( metaBoxes ) {
-			provider.store.dispatch( initializeMetaBoxState( metaBoxes ) );
+			provider.store.dispatch( actions.initializeMetaBoxState( metaBoxes ) );
 		},
 	};
 }

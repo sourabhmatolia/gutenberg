@@ -38,7 +38,7 @@ class EditorProvider extends Component {
 	constructor( props ) {
 		super( ...arguments );
 
-		this.store = createReduxStore( props.initialState );
+		this.store = props.store || createReduxStore( props.initialState );
 		this.settings = {
 			...DEFAULT_SETTINGS,
 			...props.settings,
@@ -46,7 +46,7 @@ class EditorProvider extends Component {
 
 		// If initial state is passed, assume that we don't need to initialize,
 		// as in the case of an error recovery.
-		if ( ! props.initialState ) {
+		if ( ! props.initialState && props.post ) {
 			this.store.dispatch( setupEditor( props.post, this.settings ) );
 		}
 	}
