@@ -33,6 +33,7 @@ import {
 	focusBlock,
 	insertBlocks,
 	mergeBlocks,
+	updateBlock,
 	removeBlock,
 	replaceBlocks,
 	selectBlock,
@@ -440,6 +441,8 @@ class BlockListBlock extends Component {
 								onReplace={ onReplace }
 								setFocus={ partial( onFocus, block.uid ) }
 								mergeBlocks={ this.mergeBlocks }
+								children={ block.innerBlocks }
+								setChildren={ this.props.setChildren }
 								className={ className }
 								id={ block.uid }
 							/>
@@ -539,6 +542,10 @@ const mapDispatchToProps = ( dispatch, ownProps ) => ( {
 
 	onMetaChange( meta ) {
 		dispatch( editPost( { meta } ) );
+	},
+
+	setChildren( children ) {
+		dispatch( updateBlock( ownProps.uid, { innerBlocks: children } ) );
 	},
 } );
 
