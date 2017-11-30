@@ -1,7 +1,7 @@
 /**
  * WordPress dependencies
  */
-import { Component, compose } from '@wordpress/element';
+import { Component } from '@wordpress/element';
 import { withContext } from '@wordpress/components';
 
 /**
@@ -75,10 +75,7 @@ class BlockChildren extends Component {
 	}
 }
 
-BlockChildren = compose(
-	withContext( 'editor' )(),
-	withContext( 'store' )(),
-)( BlockChildren );
+BlockChildren = withContext( 'editor' )()( BlockChildren );
 
 BlockChildren.Content = ( { value } ) => {
 	if ( ! value ) {
