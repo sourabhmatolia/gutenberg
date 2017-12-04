@@ -197,7 +197,7 @@ class BlockList extends Component {
 	}
 
 	render() {
-		const { blocks, showContextualToolbar } = this.props;
+		const { blocks, onDeselectBlock, showContextualToolbar } = this.props;
 
 		return (
 			<div>
@@ -210,6 +210,7 @@ class BlockList extends Component {
 						onSelectionStart={ this.onSelectionStart }
 						onShiftSelection={ this.onShiftSelection }
 						showContextualToolbar={ showContextualToolbar }
+						onDeselect={ onDeselectBlock }
 					/>,
 					<BlockListSiblingInserter
 						key={ 'sibling-inserter-' + uid }
