@@ -175,7 +175,16 @@ export function createBlockWithFallback( name, innerHTML, attributes ) {
 
 	// Try finding type for known block name, else fall back again.
 	let blockType = getBlockType( name );
+
 	const fallbackBlock = getUnknownTypeHandlerName();
+
+	// Fallback content may be upgraded from classic editor expecting implicit
+	// automatic paragraphs, so preserve them. Assumes wpautop is idempotent,
+	// meaning there are no negative consequences to repeated autop calls.
+	if ( name === fallbackBlock ) {
+		innerHTML = wp.oldEditor.autop( innerHTML ).trim();
+	}
+
 	if ( ! blockType ) {
 		// If detected as a block which is not registered, preserve comment
 		// delimiters in content of unknown type handler.
