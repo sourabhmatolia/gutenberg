@@ -156,14 +156,79 @@ export function getAttributesFromDeprecatedVersion( blockType, innerHTML, attrib
 }
 
 /**
+ * Given a string of unknown content, returns an array of segmented fallback
+ * and paragraph blocks.
+ *
+ * @param  {String}   content Unknown content
+ * @return {Object[]}         Block objects
+ */
+export function getParagraphBlocksFromFallbackContent( content ) {
+	const fallbackBlock = getUnknownTypeHandlerName();
+
+	let parts = [ content ];
+
+	let match;
+	while ( ( match = parts[ parts.length - 1 ].match( /^<p>(.*?)<\/p>/m ) ) ) {
+		// Text prior to the paragraph match
+		const freeformContent = parts[ parts.length - 1 ].slice( 0, match.index ).trim();
+
+		parts = [
+			// We work with the last element in the parts array, but preserve
+			// previous parts.
+			...parts.slice( 0, -1 ),
+
+			// Only if text prior to paragraph is non-empty do we include it as
+			// a freeform block.
+			...freeformContent ?
+				[ createBlock(
+					fallbackBlock,
+					getBlockAttributes(
+						getBlockType( fallbackBlock ),
+						freeformContent
+					)
+				) ] :
+				[],
+
+			// Create paragraph block from paragraph text.
+			createBlock(
+				'core/paragraph',
+				getBlockAttributes(
+					getBlockType( 'core/paragraph' ),
+					match[ 0 ]
+				)
+			),
+
+			// Leave remainder of text as string to be handled in iteration.
+			parts[ parts.length - 1 ].slice( match.index + match[ 0 ].length ).trim(),
+		];
+	}
+
+	// If last segment of text is empty, trim from parts.
+	if ( ! parts[ parts.length - 1 ] ) {
+		return parts.slice( 0, -1 );
+	}
+
+	// Otherwise, convert to freeform block.
+	parts[ parts.length - 1 ] = createBlock(
+		fallbackBlock,
+		getBlockAttributes(
+			getBlockType( fallbackBlock ),
+			parts[ parts.length - 1 ]
+		)
+	);
+
+	return parts;
+}
+
+/**
  * Creates a block with fallback to the unknown type handler.
  *
- * @param  {?String} name       Block type name
- * @param  {String}  innerHTML  Raw block content
- * @param  {?Object} attributes Attributes obtained from block delimiters
- * @return {?Object}            An initialized block object (if possible)
+ * @param  {?String}  name       Block type name
+ * @param  {String}   innerHTML  Raw block content
+ * @param  {?Object}  attributes Attributes obtained from block delimiters
+ * @return {Object[]}            An initialized block object (if possible)
  */
-export function createBlockWithFallback( name, innerHTML, attributes ) {
+export function createBlocksWithFallback( name, innerHTML, attributes ) {
 	// Use type from block content, otherwise find unknown handler.
 	name = name || getUnknownTypeHandlerName();
 
@@ -182,7 +247,16 @@ export function createBlockWithFallback( name, innerHTML, attributes ) {
 	// automatic paragraphs, so preserve them. Assumes wpautop is idempotent,
 	// meaning there are no negative consequences to repeated autop calls.
 	if ( name === fallbackBlock ) {
+		// Temporary: Normally we'd allow an empty string to be treated the
+		// same as any other, but due to a bug in wpautop's treatment of empty
+		// strings, we must return early.
+		if ( ! innerHTML ) {
+			return [];
+		}
+
 		innerHTML = wp.oldEditor.autop( innerHTML ).trim();
+
+		return getParagraphBlocksFromFallbackContent( innerHTML );
 	}
 
 	if ( ! blockType ) {
@@ -197,40 +271,39 @@ export function createBlockWithFallback( name, innerHTML, attributes ) {
 	}
 
 	// Include in set only if type were determined.
-	// TODO do we ever expect there to not be an unknown type handler?
-	if ( blockType && ( innerHTML || name !== fallbackBlock ) ) {
-		// TODO allow blocks to opt-in to receiving a tree instead of a string.
-		// Gradually convert all blocks to this new format, then remove the
-		// string serialization.
-		const block = createBlock(
-			name,
-			getBlockAttributes( blockType, innerHTML, attributes )
-		);
-
-		// Validate that the parsed block is valid, meaning that if we were to
-		// reserialize it given the assumed attributes, the markup matches the
-		// original value.
-		block.isValid = isValidBlock( innerHTML, blockType, block.attributes );
-
-		// Preserve original content for future use in case the block is parsed
-		// as invalid, or future serialization attempt results in an error
-		block.originalContent = innerHTML;
-
-		// When a block is invalid, attempt to parse it using a supplied `deprecated` definition.
-		// This allows blocks to modify their attribute and markup structure without invalidating
-		// content written in previous formats.
-		if ( ! block.isValid ) {
-			const attributesParsedWithDeprecatedVersion = getAttributesFromDeprecatedVersion(
-				blockType, innerHTML, attributes
-			);
-			if ( attributesParsedWithDeprecatedVersion ) {
-				block.isValid = true;
-				block.attributes = attributesParsedWithDeprecatedVersion;
-			}
-		}
-
-		return block;
+	if ( ! blockType || ( ! innerHTML && name === fallbackBlock ) ) {
+		return [];
 	}
+
+	// Create block node, extracting attributes given type.
+	const block = createBlock(
+		name,
+		getBlockAttributes( blockType, innerHTML, attributes )
+	);
+
+	// Validate that the parsed block is valid, meaning that if we were to
+	// reserialize it given the assumed attributes, the markup matches the
+	// original value.
+	block.isValid = isValidBlock( innerHTML, blockType, block.attributes );
+
+	// Preserve original content for future use in case the block is parsed
+	// as invalid, or future serialization attempt results in an error
+	block.originalContent = innerHTML;
+
+	// When a block is invalid, attempt to parse it using a supplied `deprecated` definition.
+	// This allows blocks to modify their attribute and markup structure without invalidating
+	// content written in previous formats.
+	if ( ! block.isValid ) {
+		const attributesParsedWithDeprecatedVersion = getAttributesFromDeprecatedVersion(
+			blockType, innerHTML, attributes
+		);
+		if ( attributesParsedWithDeprecatedVersion ) {
+			block.isValid = true;
+			block.attributes = attributesParsedWithDeprecatedVersion;
+		}
+	}
+
+	return [ block ];
 }
 
 /**
@@ -240,13 +313,13 @@ export function createBlockWithFallback( name, innerHTML, attributes ) {
  * @return {Array}          Block list
  */
 export function parseWithGrammar( content ) {
-	return grammarParse( content ).reduce( ( memo, blockNode ) => {
+	return grammarParse( content ).reduce( ( parsed, blockNode ) => {
 		const { blockName, innerHTML, attrs } = blockNode;
-		const block = createBlockWithFallback( blockName, innerHTML.trim(), attrs );
-		if ( block ) {
-			memo.push( block );
-		}
-		return memo;
+
+		return [
+			...parsed,
+			...createBlocksWithFallback( blockName, innerHTML.trim(), attrs ),
+		];
 	}, [] );
 }
 
