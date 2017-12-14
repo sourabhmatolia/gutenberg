@@ -206,6 +206,13 @@ export function serializeBlock( block ) {
 
 			return compact( [ moreTag, noTeaserTag ] ).join( '\n' );
 
+		case 'core/paragraph':
+			if ( isEmpty( saveAttributes ) ) {
+				return saveContent;
+			}
+
+			return getCommentDelimitedContent( blockName, saveAttributes, saveContent );
+
 		case getUnknownTypeHandlerName():
 			return saveContent;
 
