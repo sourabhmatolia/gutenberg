@@ -8,6 +8,20 @@
 	justify-content: center;
 	align-items: center;
 
+	&.contentalignleft {
+		justify-content: flex-start;
+		h2 {
+			text-align: left;
+		}
+	}
+
+	&.contentalignright {
+		justify-content: flex-end;
+		h2 {
+			text-align: right;
+		}
+	}
+
 	h2 {
 		color: white;
 		font-size: 24pt;
