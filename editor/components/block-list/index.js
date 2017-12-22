@@ -211,7 +211,7 @@ class BlockList extends Component {
 		return (
 			<div>
 				{ !! blocks.length && <BlockListSiblingInserter /> }
-				{ flatMap( blocks, ( uid ) => [
+				{ flatMap( blocks, ( uid ) => (
 					<BlockListBlock
 						key={ 'block-' + uid }
 						uid={ uid }
@@ -219,12 +219,8 @@ class BlockList extends Component {
 						onSelectionStart={ this.onSelectionStart }
 						onShiftSelection={ this.onShiftSelection }
 						showContextualToolbar={ showContextualToolbar }
-					/>,
-					<BlockListSiblingInserter
-						key={ 'sibling-inserter-' + uid }
-						uid={ uid }
-					/>,
-				] ) }
+					/>
+				) ) }
 			</div>
 		);
 	}
