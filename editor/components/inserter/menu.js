@@ -280,15 +280,21 @@ export class InserterMenu extends Component {
 		return this.renderCategories( visibleBlocks );
 	}
 
-	interceptArrows( event ) {
+	onTabbableEvent( event ) {
+		// If a tab (Recent, Blocks, …) is focused, pressing the down arrow
+		// moves focus to the selected panel below.
+		if (
+			event.keyCode === keycodes.DOWN &&
+			document.activeElement.getAttribute( 'role' ) === 'tab'
+		) {
+			return 1;
+		}
+
+		// Prevent cases of focus being unexpectedly stolen up in the tree,
+		// notably when using VisualEditorSiblingInserter, where focus is
+		// moved to sibling blocks.
 		if ( includes( ARROWS, event.keyCode ) ) {
-			// Prevent cases of focus being unexpectedly stolen up in the tree,
-			// notably when using VisualEditorSiblingInserter, where focus is
-			// moved to sibling blocks.
-			//
-			// We don't need to stop the native event, which has its uses, e.g.
-			// allowing window scrolling.
-			event.stopPropagation();
+			return 0;
 		}
 	}
 
@@ -298,7 +304,7 @@ export class InserterMenu extends Component {
 
 		return (
 			<TabbableContainer className="editor-inserter__menu" deep
-				onKeyDown={ this.interceptArrows }
+				eventToOffset={ this.onTabbableEvent }
 			>
 				<label htmlFor={ `editor-inserter__search-${ instanceId }` } className="screen-reader-text">
 					{ __( 'Search for a block' ) }

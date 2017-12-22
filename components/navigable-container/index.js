@@ -121,6 +121,7 @@ class NavigableContainer extends Component {
 export class NavigableMenu extends Component {
 	render() {
 		const { role = 'menu', orientation = 'vertical', ...rest } = this.props;
+
 		const eventToOffset = ( evt ) => {
 			const { keyCode } = evt;
 
@@ -163,6 +164,11 @@ export class TabbableContainer extends Component {
 			const { keyCode, shiftKey } = evt;
 			if ( TAB === keyCode ) {
 				return shiftKey ? -1 : 1;
+			}
+
+			// Allow custom handling of keys besides Tab.
+			if ( this.props.eventToOffset ) {
+				return this.props.eventToOffset( evt );
 			}
 		};
 
