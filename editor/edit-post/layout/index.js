@@ -22,14 +22,14 @@ import DocumentTitle from '../document-title';
 import { MetaBoxes, AutosaveMonitor, UnsavedChangesWarning, EditorNotices } from '../../components';
 import {
 	getEditorMode,
+	hasFixedToolbar,
 	isEditorSidebarOpened,
-	isFeatureActive,
 } from '../../store/selectors';
 
-function Layout( { mode, isSidebarOpened, hasFixedToolbar } ) {
+function Layout( { mode, isSidebarOpened, fixedToolbarActive } ) {
 	const className = classnames( 'editor-layout', {
 		'is-sidebar-opened': isSidebarOpened,
-		'has-fixed-toolbar': hasFixedToolbar,
+		'has-fixed-toolbar': fixedToolbarActive,
 	} );
 
 	return (
@@ -61,6 +61,6 @@ export default connect(
 	( state ) => ( {
 		mode: getEditorMode( state ),
 		isSidebarOpened: isEditorSidebarOpened( state ),
-		hasFixedToolbar: isFeatureActive( state, 'fixedToolbar' ),
+		fixedToolbarActive: hasFixedToolbar( state ),
 	} ),
 )( navigateRegions( Layout ) );
