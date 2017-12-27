@@ -73,9 +73,9 @@ import {
 	getMostFrequentlyUsedBlocks,
 	getRecentlyUsedBlocks,
 	getMetaBoxes,
-	getDirtyMetaBoxes,
+	hasMetaBoxes,
+	isSavingMetaBoxes,
 	getMetaBox,
-	isMetaBoxStateDirty,
 	getReusableBlock,
 	isSavingReusableBlock,
 	isSelectionEnabled,
@@ -99,7 +99,6 @@ describe( 'selectors', () => {
 	} );
 
 	beforeEach( () => {
-		getDirtyMetaBoxes.clear();
 		getBlock.clear();
 		getBlocks.clear();
 		getEditedPostContent.clear();
@@ -129,24 +128,71 @@ describe( 'selectors', () => {
 		} );
 	} );
 
-	describe( 'getDirtyMetaBoxes', () => {
-		it( 'should return array of just the side location', () => {
+	describe( 'hasMetaBoxes', () => {
+		it( 'should return true if there are active meta boxes', () => {
 			const state = {
 				metaBoxes: {
 					normal: {
 						isActive: false,
-						isDirty: false,
+					},
+					side: {
+						isActive: true,
+					},
+				},
+			};
+
+			expect( hasMetaBoxes( state ) ).toBe( true );
+		} );
+
+		it( 'should return false if there are no active meta boxes', () => {
+			const state = {
+				metaBoxes: {
+					normal: {
+						isActive: false,
+					},
+					side: {
+						isActive: false,
+					},
+				},
+			};
+
+			expect( hasMetaBoxes( state ) ).toBe( false );
+		} );
+	} );
+
+	describe( 'isSavingMetaBoxes', () => {
+		it( 'should return true if some meta boxes are saving', () => {
+			const state = {
+				metaBoxes: {
+					normal: {
+						isActive: false,
 						isUpdating: false,
 					},
 					side: {
 						isActive: true,
-						isDirty: true,
+						isUpdating: true,
+					},
+				},
+			};
+
+			expect( isSavingMetaBoxes( state ) ).toBe( true );
+		} );
+
+		it( 'should return false if no meta boxes are saving', () => {
+			const state = {
+				metaBoxes: {
+					normal: {
+						isActive: false,
+						isUpdating: false,
+					},
+					side: {
+						isActive: true,
 						isUpdating: false,
 					},
 				},
 			};
 
-			expect( getDirtyMetaBoxes( state ) ).toEqual( [ 'side' ] );
+			expect( isSavingMetaBoxes( state ) ).toBe( false );
 		} );
 	} );
 
@@ -200,103 +246,6 @@ describe( 'selectors', () => {
 				isDirty: false,
 				isUpdating: false,
 			} );
-		} );
-	} );
-
-	describe( 'isMetaBoxStateDirty', () => {
-		it( 'should return false', () => {
-			const state = {
-				metaBoxes: {
-					normal: {
-						isActive: false,
-						isDirty: false,
-						isUpdating: false,
-					},
-					side: {
-						isActive: false,
-						isDirty: false,
-						isUpdating: false,
-					},
-				},
-			};
-
-			expect( isMetaBoxStateDirty( state ) ).toEqual( false );
-		} );
-
-		it( 'should return false when a dirty meta box is not active.', () => {
-			const state = {
-				metaBoxes: {
-					normal: {
-						isActive: false,
-						isDirty: true,
-						isUpdating: false,
-					},
-					side: {
-						isActive: false,
-						isDirty: false,
-						isUpdating: false,
-					},
-				},
-			};
-
-			expect( isMetaBoxStateDirty( state ) ).toEqual( false );
-		} );
-
-		it( 'should return false when both meta boxes are dirty but inactive.', () => {
-			const state = {
-				metaBoxes: {
-					normal: {
-						isActive: false,
-						isDirty: true,
-						isUpdating: false,
-					},
-					side: {
-						isActive: false,
-						isDirty: true,
-						isUpdating: false,
-					},
-				},
-			};
-
-			expect( isMetaBoxStateDirty( state ) ).toEqual( false );
-		} );
-
-		it( 'should return false when a dirty meta box is active.', () => {
-			const state = {
-				metaBoxes: {
-					normal: {
-						isActive: true,
-						isDirty: true,
-						isUpdating: false,
-					},
-					side: {
-						isActive: false,
-						isDirty: false,
-						isUpdating: false,
-					},
-				},
-			};
-
-			expect( isMetaBoxStateDirty( state ) ).toEqual( true );
-		} );
-
-		it( 'should return false when both meta boxes are dirty and active.', () => {
-			const state = {
-				metaBoxes: {
-					normal: {
-						isActive: true,
-						isDirty: true,
-						isUpdating: false,
-					},
-					side: {
-						isActive: true,
-						isDirty: true,
-						isUpdating: false,
-					},
-				},
-			};
-
-			expect( isMetaBoxStateDirty( state ) ).toEqual( true );
 		} );
 	} );
 
@@ -593,38 +542,11 @@ describe( 'selectors', () => {
 	} );
 
 	describe( 'isEditedPostDirty', () => {
-		const metaBoxes = {
-			normal: {
-				isActive: false,
-				isDirty: false,
-				isUpdating: false,
-			},
-			side: {
-				isActive: false,
-				isDirty: false,
-				isUpdating: false,
-			},
-		};
-		// Those dirty dang meta boxes.
-		const dirtyMetaBoxes = {
-			normal: {
-				isActive: true,
-				isDirty: true,
-				isUpdating: false,
-			},
-			side: {
-				isActive: false,
-				isDirty: false,
-				isUpdating: false,
-			},
-		};
-
 		it( 'should return true when post saved state dirty', () => {
 			const state = {
 				editor: {
 					isDirty: true,
 				},
-				metaBoxes,
 			};
 
 			expect( isEditedPostDirty( state ) ).toBe( true );
@@ -635,21 +557,9 @@ describe( 'selectors', () => {
 				editor: {
 					isDirty: false,
 				},
-				metaBoxes,
 			};
 
 			expect( isEditedPostDirty( state ) ).toBe( false );
-		} );
-
-		it( 'should return true when post saved state not dirty, but meta box state has changed.', () => {
-			const state = {
-				editor: {
-					isDirty: false,
-				},
-				metaBoxes: dirtyMetaBoxes,
-			};
-
-			expect( isEditedPostDirty( state ) ).toBe( true );
 		} );
 	} );
 
@@ -2077,7 +1987,7 @@ describe( 'selectors', () => {
 			expect( isSavingPost( state ) ).toBe( true );
 		} );
 
-		it( 'should return false if the post is currently being saved', () => {
+		it( 'should return false if the post is not currently being saved', () => {
 			const state = {
 				saving: {
 					requesting: false,
@@ -2085,6 +1995,21 @@ describe( 'selectors', () => {
 			};
 
 			expect( isSavingPost( state ) ).toBe( false );
+		} );
+
+		it( 'should return true if the post is notcurrently being saved but meta boxes are saving', () => {
+			const state = {
+				saving: {
+					requesting: false,
+				},
+				metaBoxes: {
+					normal: {
+						isUpdating: true,
+					},
+				},
+			};
+
+			expect( isSavingPost( state ) ).toBe( true );
 		} );
 	} );
 

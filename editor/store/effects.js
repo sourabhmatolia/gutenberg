@@ -41,7 +41,6 @@ import {
 import {
 	getCurrentPost,
 	getCurrentPostType,
-	getDirtyMetaBoxes,
 	getEditedPostContent,
 	getPostEdits,
 	isCurrentPostPublished,
@@ -105,7 +104,7 @@ export default {
 	},
 	REQUEST_POST_UPDATE_SUCCESS( action, store ) {
 		const { previousPost, post } = action;
-		const { dispatch, getState } = store;
+		const { dispatch } = store;
 
 		const publishStatus = [ 'publish', 'private', 'future' ];
 		const isPublished = includes( publishStatus, previousPost.status );
@@ -145,7 +144,7 @@ export default {
 		}
 
 		// Update dirty meta boxes.
-		dispatch( requestMetaBoxUpdates( getDirtyMetaBoxes( getState() ) ) );
+		dispatch( requestMetaBoxUpdates() );
 
 		if ( get( window.history.state, 'id' ) !== post.id ) {
 			window.history.replaceState(

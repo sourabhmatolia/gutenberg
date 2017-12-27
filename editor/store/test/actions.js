@@ -8,7 +8,6 @@ import {
 	stopTyping,
 	requestMetaBoxUpdates,
 	handleMetaBoxReload,
-	metaBoxStateChanged,
 	initializeMetaBoxState,
 	fetchReusableBlocks,
 	updateReusableBlock,
@@ -555,9 +554,8 @@ describe( 'actions', () => {
 
 	describe( 'requestMetaBoxUpdates', () => {
 		it( 'should return the REQUEST_META_BOX_UPDATES action', () => {
-			expect( requestMetaBoxUpdates( [ 'normal' ] ) ).toEqual( {
+			expect( requestMetaBoxUpdates() ).toEqual( {
 				type: 'REQUEST_META_BOX_UPDATES',
-				locations: [ 'normal' ],
 			} );
 		} );
 	} );
@@ -567,16 +565,6 @@ describe( 'actions', () => {
 			expect( handleMetaBoxReload( 'normal' ) ).toEqual( {
 				type: 'HANDLE_META_BOX_RELOAD',
 				location: 'normal',
-			} );
-		} );
-	} );
-
-	describe( 'metaBoxStateChanged', () => {
-		it( 'should return the META_BOX_STATE_CHANGED action with a hasChanged flag', () => {
-			expect( metaBoxStateChanged( 'normal', true ) ).toEqual( {
-				type: 'META_BOX_STATE_CHANGED',
-				location: 'normal',
-				hasChanged: true,
 			} );
 		} );
 	} );
