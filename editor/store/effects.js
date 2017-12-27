@@ -366,7 +366,7 @@ export default {
 					id,
 				} );
 				dispatch( createSuccessNotice(
-					__( 'Block updated.' ),
+					isTemporary ? __( 'Block created.' ) : __( 'Block updated.' ),
 					{ id: REUSABLE_BLOCK_NOTICE_ID }
 				) );
 			},
