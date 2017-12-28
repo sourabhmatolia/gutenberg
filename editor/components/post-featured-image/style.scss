@@ -30,3 +30,9 @@
 	font-style: italic;
 	margin: 10px 0;
 }
+
+.editor-post-featured-image__media-modal {
+	.setting[data-setting="caption"], .setting[data-setting="description"] {
+		display: none;
+	}
+}
