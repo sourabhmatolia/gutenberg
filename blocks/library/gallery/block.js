@@ -99,6 +99,7 @@ class GalleryBlock extends Component {
 			filesList: event.target.files,
 			setAttributes: this.props.setAttributes,
 			gallery: isGallery,
+			onError: this.props.createErrorNotice,
 		} );
 	}
 
@@ -128,6 +129,7 @@ class GalleryBlock extends Component {
 				} );
 			},
 			gallery: isGallery,
+			onError: this.props.createErrorNotice,
 		} );
 	}
 

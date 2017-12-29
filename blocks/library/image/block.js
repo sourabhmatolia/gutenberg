@@ -111,15 +111,23 @@ class ImageBlock extends Component {
 	}
 
 	render() {
-		const { attributes, setAttributes, focus, setFocus, className, settings, toggleSelection } = this.props;
+		const { attributes, createErrorNotice, setAttributes, focus, setFocus, className, settings, toggleSelection } = this.props;
 		const { url, alt, caption, align, id, href, width, height } = attributes;
 
 		const availableSizes = this.getAvailableSizes();
 		const figureStyle = width ? { width } : {};
 		const isResizable = [ 'wide', 'full' ].indexOf( align ) === -1 && ( ! viewPort.isExtraSmall() );
 		const uploadButtonProps = { isLarge: true };
-		const uploadFromFiles = ( event ) => mediaUpload( { filesList: event.target.files, setAttributes } );
-		const dropFiles = ( files ) => mediaUpload( { filesList: files, setAttributes } );
+		const uploadFromFiles = ( event ) => mediaUpload( {
+			filesList: event.target.files,
+			setAttributes,
+			onError: createErrorNotice,
+		} );
+		const dropFiles = ( files ) => mediaUpload( {
+			filesList: files,
+			setAttributes,
+			onError: createErrorNotice,
+		} );
 
 		const controls = (
 			focus && (

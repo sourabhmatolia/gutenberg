@@ -84,13 +84,17 @@ registerBlockType( 'core/cover-image', {
 		}
 	},
 
-	edit( { attributes, setAttributes, focus, setFocus, className } ) {
+	edit( { attributes, setAttributes, focus, setFocus, className, createErrorNotice } ) {
 		const { url, title, align, id, hasParallax, dimRatio } = attributes;
 		const updateAlignment = ( nextAlign ) => setAttributes( { align: nextAlign } );
 		const onSelectImage = ( media ) => setAttributes( { url: media.url, id: media.id } );
 		const toggleParallax = () => setAttributes( { hasParallax: ! hasParallax } );
 		const setDimRatio = ( ratio ) => setAttributes( { dimRatio: ratio } );
-		const dropFiles = ( files ) => mediaUpload( { filesList: files, setAttributes } );
+		const dropFiles = ( files ) => mediaUpload( {
+			filesList: files,
+			setAttributes,
+			onError: createErrorNotice,
+		} );
 		const style = url ?
 			{ backgroundImage: `url(${ url })` } :
 			undefined;
