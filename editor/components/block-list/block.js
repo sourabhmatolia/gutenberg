@@ -35,6 +35,7 @@ import BlockMultiControls from './multi-controls';
 import BlockMobileToolbar from './block-mobile-toolbar';
 import {
 	clearSelectedBlock,
+	createErrorNotice,
 	editPost,
 	focusBlock,
 	insertBlocks,
@@ -421,6 +422,7 @@ export class BlockListBlock extends Component {
 								id={ block.uid }
 								isSelectionEnabled={ this.props.isSelectionEnabled }
 								toggleSelection={ this.props.toggleSelection }
+								createErrorNotice={ this.props.createErrorNotice }
 							/>
 						) }
 						{ isValid && mode === 'html' && (
@@ -521,6 +523,9 @@ const mapDispatchToProps = ( dispatch, ownProps ) => ( {
 	},
 	toggleSelection( selectionEnabled ) {
 		dispatch( toggleSelection( selectionEnabled ) );
+	},
+	createErrorNotice( ...args ) {
+		dispatch( createErrorNotice( ...args ) );
 	},
 } );
 
