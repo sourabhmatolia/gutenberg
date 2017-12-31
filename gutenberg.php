@@ -14,7 +14,7 @@ define( 'GUTENBERG_DEVELOPMENT_MODE', true );
 ### END AUTO-GENERATED DEFINES
 
 
-// Initialize Plugin
+// Initialize Plugin - Edited
 gutenberg_pre_init();
 
 /**
